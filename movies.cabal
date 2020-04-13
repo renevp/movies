@@ -1,0 +1,70 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: f3206026c2a0445c5a400a4ce18dbc087da7230764c7b14803c54a61effc07db
+
+name:           movies
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/renevp/movies#readme>
+homepage:       https://github.com/renevp/movies#readme
+bug-reports:    https://github.com/renevp/movies/issues
+author:         Rene
+maintainer:     renev@hotmail.com
+copyright:      BSD
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/renevp/movies
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_movies
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+  default-language: Haskell2010
+
+executable movies-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_movies
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , movies
+    , aeson
+    , http-types
+    , monad-logger
+    , persistent
+    , persistent-sqlite
+    , persistent-template
+    , Spock
+    , text
+  default-language: Haskell2010
+
+test-suite movies-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_movies
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , movies
+  default-language: Haskell2010
