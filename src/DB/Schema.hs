@@ -7,10 +7,10 @@
 {-# LANGUAGE TypeFamilies               #-}
 
 module DB.Schema where
-    import           Database.Persist          hiding (delete, get)
+    import           Database.Persist          
     import           Database.Persist.TH
     import           Data.Text                 (Text, pack)
-    import           Data.Aeson                hiding (json)
+    import           Data.Aeson                
 
     share
         [mkPersist sqlSettings, mkMigrate "migrateAll"]

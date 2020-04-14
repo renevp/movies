@@ -4,6 +4,7 @@
 {-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE TypeFamilies               #-}
+{-# LANGUAGE ScopedTypeVariables        #-}
 
 module URLs.Api where
 
@@ -25,9 +26,6 @@ import           Network.HTTP.Types.Status
 import           URLs.ErrorHandler
 import           DB.Schema
 
--- import Control.Exception
--- import System.IO.Error
-
 type Api = SpockM SqlBackend () () ()
 
 type ApiAction a = SpockAction SqlBackend () () a
@@ -37,6 +35,7 @@ app = do
   get "movies" $ do
     allMovies <- runSQL $ selectList [] [Asc MovieId]
     json allMovies
+
   post "movies" $ do
     maybeMovie <- jsonBody :: ApiAction (Maybe Movie)
     case maybeMovie of
@@ -47,6 +46,7 @@ app = do
         newId <- runSQL $ insert theMovie
         setStatus created201
         json $ object ["result" .= String "success", "id" .= newId]
+
   get ("movies" <//> var) $ \movieId -> do
     maybeMovie <- runSQL $ P.get movieId :: ApiAction (Maybe Movie)
     case maybeMovie of
@@ -54,6 +54,7 @@ app = do
         setStatus notFound404
         errorJson 2 "Could not find a movie with matching id"
       Just theMovie -> json theMovie
+
   put ("movies" <//> var) $ \movieId -> do
     maybeMovie <- jsonBody
     case (maybeMovie :: Maybe Movie) of
@@ -64,9 +65,11 @@ app = do
         runSQL $ replace movieId theMovie
         setStatus created201
         json $ object ["result" .= String "success", "id" .= movieId]
+
   delete ("movies" <//> var) $ \movieId -> do
     runSQL $ P.delete (movieId :: MovieId)
     setStatus noContent204
+
   post ("movies" <//> "reviews") $ do
     maybeReview <- jsonBody :: ApiAction (Maybe Review)
     case maybeReview of
@@ -77,7 +80,7 @@ app = do
         newId <- runSQL $ insert theReview
         setStatus created201
         json $ object ["result" .= String "success", "id" .= newId]
-        -- `catch` (\(e :: ErrorCall) -> errorJson 3 "Other error: " ++ show e)
+
   get ("movies" <//> "reviews") $ do
     allReviews <- runSQL $ selectList [] [Asc ReviewId]
     json allReviews

@@ -18,8 +18,8 @@ import           URLs.ErrorHandler
 
 main :: IO ()
 main = do
-  pool <- runStdoutLoggingT $ createSqlitePool "movie.db" 5
-  spockCfg' <- defaultSpockCfg () (PCPool pool) ()
-  let spockCfg = spockCfg' {spc_errorHandler = jsonErrorHandler}
-  runStdoutLoggingT $ runSqlPool (do runMigration migrateAll) pool
-  runSpock 8080 (spock spockCfg app)
+    pool <- runStdoutLoggingT $ createSqlitePool "movie.db" 5
+    spockCfg' <- defaultSpockCfg () (PCPool pool) ()
+    let spockCfg = spockCfg' {spc_errorHandler = jsonErrorHandler}
+    runStdoutLoggingT $ runSqlPool (do runMigration migrateAll) pool
+    runSpock 8080 (spock spockCfg app)
