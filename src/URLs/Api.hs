@@ -35,11 +35,13 @@ type ApiAction a = SpockAction SqlBackend () () a
 app :: Api
 app = do
 -- Fecth all movies
+-- Example: curl http://localhost:8080/movies | jq .
   get "movies" $ do
     allMovies <- runSQL $ selectList [] [Asc MovieId]
     json allMovies
 
 -- Save movie
+-- Example: curl -H "Content-Type: application/json" -d '{ "name": "Marriage Story", "synopsis": "Drama movie", "year": 2020 }' http://localhost:8080/movies | jq .
   post "movies" $ do
     maybeMovie <- jsonBody :: ApiAction (Maybe Movie)
     case maybeMovie of
@@ -52,6 +54,7 @@ app = do
         json $ object ["result" .= String "success", "id" .= newId]
 
 -- Get a movie by MovieId
+-- Example: curl http://localhost:8080/movies/1 | jq .
   get ("movies" <//> var) $ \movieId -> do
     maybeMovie <- runSQL $ P.get movieId :: ApiAction (Maybe Movie)
     case maybeMovie of
@@ -61,6 +64,7 @@ app = do
       Just theMovie -> json theMovie
 
 -- Update movie
+-- Example: curl -XPUT -H "Content-Type: application/json" -d '{ "name": "Doctor Sleep", "synopsis": "Fantasy movie", "year": 2020 }' http://localhost:8080/movies/5 | jq .
   put ("movies" <//> var) $ \movieId -> do
     maybeMovie <- jsonBody
     case (maybeMovie :: Maybe Movie) of
@@ -73,11 +77,19 @@ app = do
         json $ object ["result" .= String "success", "id" .= movieId]
 
 -- Delete a movie
+-- Example: curl -XDELETE  http://localhost:8080/movies/6 | jq .
   delete ("movies" <//> var) $ \movieId -> do
-    runSQL $ P.delete (movieId :: MovieId)
-    setStatus noContent204
+    maybeMovie <- runSQL $ P.get movieId :: ApiAction (Maybe Movie)
+    case maybeMovie of
+      Nothing -> do 
+        setStatus noContent204
+        errorJson 4 "Could not find a movie with matching id"
+      Just theMovie -> do
+        runSQL $ P.delete movieId 
+        json $ object ["result" .= String "deleted", "id" .= movieId]
 
 -- Save a review
+-- Example: curl -H "Content-Type: application/json" -d '{ "movie": 5, "author": "Rene", "comment": "No too bad" }' http://localhost:8080/movies/reviews | jq .
   post ("movies" <//> "reviews") $ do
     maybeReview <- jsonBody :: ApiAction (Maybe Review)
     case maybeReview of
@@ -90,6 +102,7 @@ app = do
         json $ object ["result" .= String "success", "id" .= newId]
 
 -- Fetch reviews
+-- Example: curl http://localhost:8080/movies/reviews | jq .
   get ("movies" <//> "reviews") $ do
     allReviews <- runSQL $ selectList [] [Asc ReviewId]
     json allReviews

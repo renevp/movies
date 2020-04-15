@@ -22,7 +22,7 @@ main = do
     pool <- runStdoutLoggingT $ createSqlitePool "movie.db" 5
     -- Configure Spock -> default settings Session DB GlobalState
     spockCfg' <- defaultSpockCfg () (PCPool pool) ()
-    -- Configure error handler
+    -- Configure error handler for generic errors
     let spockCfg = spockCfg' {spc_errorHandler = jsonErrorHandler}
     -- Run migrations
     runStdoutLoggingT $ runSqlPool (do runMigration migrateAll) pool
