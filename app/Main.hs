@@ -18,8 +18,13 @@ import           URLs.ErrorHandler
 
 main :: IO ()
 main = do
+    -- Define DB and pool settings
     pool <- runStdoutLoggingT $ createSqlitePool "movie.db" 5
+    -- Configure Spock -> default settings Session DB GlobalState
     spockCfg' <- defaultSpockCfg () (PCPool pool) ()
+    -- Configure error handler
     let spockCfg = spockCfg' {spc_errorHandler = jsonErrorHandler}
+    -- Run migrations
     runStdoutLoggingT $ runSqlPool (do runMigration migrateAll) pool
+    -- Create Wai.Middleware and run
     runSpock 8080 (spock spockCfg app)
